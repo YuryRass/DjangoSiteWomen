@@ -7,3 +7,11 @@ def index(request: HttpRequest) -> HttpResponse:
 
 def categories(request: HttpRequest) -> HttpResponse:
     return HttpResponse("<h1>Категории статей</h1>")
+
+
+def categories_by_id(request: HttpRequest, cat_id: int) -> HttpResponse:
+    return HttpResponse(f"<h1>Категория по ID</h1><p>ID: {cat_id}</p>")
+
+
+def archive(request: HttpRequest, year: int) -> HttpResponse:
+    return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
