@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, Http404
+from django.urls.exceptions import Resolver404
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -14,4 +15,10 @@ def categories_by_id(request: HttpRequest, cat_id: int) -> HttpResponse:
 
 
 def archive(request: HttpRequest, year: int) -> HttpResponse:
+    if year > 2024:
+        raise Http404
     return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
+
+
+def page_not_found(request: HttpRequest, exception: Resolver404) -> HttpResponseNotFound:
+    return HttpResponseNotFound("<h1>Страница не найдена!</h1>")
