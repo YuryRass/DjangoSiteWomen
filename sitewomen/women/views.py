@@ -1,4 +1,5 @@
 from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, Http404
+from django.shortcuts import redirect, reverse
 from django.urls.exceptions import Resolver404
 
 
@@ -16,7 +17,8 @@ def categories_by_id(request: HttpRequest, cat_id: int) -> HttpResponse:
 
 def archive(request: HttpRequest, year: int) -> HttpResponse:
     if year > 2024:
-        raise Http404
+        redirect_url = reverse('home')
+        return redirect(redirect_url, permanent=True)  # 301
     return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
 
 
