@@ -19,7 +19,7 @@ def index(request: HttpRequest) -> HttpResponse:
         'lst': [1, 324, 1, 34, 54, 7.4],
         'set': {3, 3, 8, 3, 1},
         'float': 5.31,
-        'class': MyClass(3, 1),
+        'class': MyClass(23, 4),
         'dict': {'key1': 1, 'key2': 2},
     }
     return render(request, 'women/index.html', context)

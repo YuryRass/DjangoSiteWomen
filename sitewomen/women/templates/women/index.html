@@ -7,6 +7,11 @@
 <h1>{{ title }}</h1>
 <p>{{ lst }}</p>
 <p>{{ set }}</p>
+{% if class.a|divisibleby:"2" %}
+<p>Условие выполнилось: "{{ class.a }} делится на 2"</p>
+{% else %}
+<p>Условие не выполнилось: "{{ class.a }} не делится на 2"</p>
+{% endif %}
 <p>{{ class.a }} {{ class.b }}</p>
 <p>{{ dict }}</p>
 </body>
