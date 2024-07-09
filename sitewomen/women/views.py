@@ -5,10 +5,24 @@ from django.template.loader import render_to_string
 from django.urls.exceptions import Resolver404
 
 
+class MyClass:
+    def __init__(self, a, b) -> None:
+        self.a = a
+        self.b = b
+
+
 def index(request: HttpRequest) -> HttpResponse:
     # t = render_to_string('women/index.html')
     # return HttpResponse(t)
-    return render(request, 'women/index.html')
+    context = {
+        'title': 'Главная страница',
+        'lst': [1, 324, 1, 34, 54, 7.4],
+        'set': {3, 3, 8, 3, 1},
+        'float': 5.31,
+        'class': MyClass(3, 1),
+        'dict': {'key1': 1, 'key2': 2},
+    }
+    return render(request, 'women/index.html', context)
 
 
 def about(request: HttpRequest) -> HttpResponse:
