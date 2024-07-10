@@ -1,26 +1,25 @@
 from django.http import HttpResponse, HttpRequest, HttpResponseNotFound
 from django.shortcuts import redirect, reverse, render
-from django.template.loader import render_to_string
+# from django.template.loader import render_to_string
 
 from django.urls.exceptions import Resolver404
 
+data_db = [
+    {'id': 1, 'title': 'Анджелина Джоли', 'content': 'Биография Анджелины Джоли', 'is_published': True},
+    {'id': 2, 'title': 'Марго Робби', 'content': 'Биография Марго Робби', 'is_published': False},
+    {'id': 3, 'title': 'Джулия Робертс', 'content': 'Биография Джулия Робертс', 'is_published': True},
+]
 
-class MyClass:
-    def __init__(self, a, b) -> None:
-        self.a = a
-        self.b = b
+menu = ["О сайте", "Добавить статью", "Обратная связь", "Войти"]
 
 
 def index(request: HttpRequest) -> HttpResponse:
     # t = render_to_string('women/index.html')
     # return HttpResponse(t)
     context = {
+        'menu': menu,
         'title': 'Главная страница',
-        'lst': [1, 324, 1, 34, 54, 7.4],
-        'set': {3, 3, 8, 3, 1},
-        'float': 5.31,
-        'class': MyClass(23, 4),
-        'dict': {'key1': 1, 'key2': 2},
+        'posts': data_db,
     }
     return render(request, 'women/index.html', context)
 
