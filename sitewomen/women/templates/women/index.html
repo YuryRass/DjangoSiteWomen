@@ -4,12 +4,19 @@
     <title>{{ title }}</title>
 </head>
 <body>
-<p>{{ menu|join:" | " }}</p>
+{% for m in menu %}
+    <ul>
+        {% if not forloop.last %}<li>{% else %}<li class="last">{% endif %}
+            <a href="{% url m.url_name %}">{{ m.title }}</a>
+        </li>
+    </ul>
+{% endfor %}
 <h1>{{ title }}</h1>
 {% for post in posts %}
     {% if post.is_published %}
         <h2>{{ post.title }}</h2>
         <p>{{ post.content }}</p>
+        <p><a href="post/{{ post.id }}">Перейти по ссылке</a></p>
         {% if not forloop.last %}
             <hr>
         {% endif %}

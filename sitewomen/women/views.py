@@ -10,7 +10,12 @@ data_db = [
     {'id': 3, 'title': 'Джулия Робертс', 'content': 'Биография Джулия Робертс', 'is_published': True},
 ]
 
-menu = ["О сайте", "Добавить статью", "Обратная связь", "Войти"]
+menu = [
+    {'title': "О сайте", 'url_name': 'about'},
+    {'title': "Добавить статью", 'url_name': 'add_page'},
+    {'title': "Обратная связь", 'url_name': 'contact'},
+    {'title': "Войти", 'url_name': 'login'},
+]
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -41,6 +46,22 @@ def archive(request: HttpRequest, year: int) -> HttpResponse:
         redirect_url = reverse('home')
         return redirect(redirect_url, permanent=True)  # 301
     return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
+
+
+def show_post(request: HttpRequest, post_id: int) -> HttpResponse:
+    return HttpResponse(f"Это пост с ID = {post_id}")
+
+
+def add(request: HttpRequest) -> HttpResponse:
+    return HttpResponse("Здесь добавление")
+
+
+def contact(request: HttpRequest) -> HttpResponse:
+    return HttpResponse("Здесь обратная связь")
+
+
+def login(request: HttpRequest) -> HttpResponse:
+    return HttpResponse("Здесь вход пользователя")
 
 
 def page_not_found(request: HttpRequest, exception: Resolver404) -> HttpResponseNotFound:
