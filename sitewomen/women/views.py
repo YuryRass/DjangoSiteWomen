@@ -30,7 +30,10 @@ def index(request: HttpRequest) -> HttpResponse:
 
 
 def about(request: HttpRequest) -> HttpResponse:
-    return render(request, "women/about.html")
+    return render(
+        request, "women/about.html",
+        {'menu': menu, 'title': "Сайт о женщинах"},
+    )
 
 
 def categories(request: HttpRequest) -> HttpResponse:
