@@ -34,9 +34,7 @@
 <td valign="top" class="left-chapters">
 	<ul id="leftchapters">
 		<li class="selected">Все категории</li>
-		{% for cat in categories %}
-		<li><a href="{% url 'category' cat.id %}">{{ cat.name }}</a></li>
-		{% endfor %}
+		{% show_categories %}
 		<li class="share">
 		</li>
 	</ul>
