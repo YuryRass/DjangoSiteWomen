@@ -23,6 +23,11 @@ menu = [
     {'title': "Войти", 'url_name': 'login'},
 ]
 
+cats_db = [
+    {'id': 1, 'name': 'Актрисы'},
+    {'id': 2, 'name': 'Певицы'},
+    {'id': 3, 'name': 'Спортсменки'},
+]
 
 def index(request: HttpRequest) -> HttpResponse:
     # t = render_to_string('women/index.html')
@@ -71,6 +76,11 @@ def contact(request: HttpRequest) -> HttpResponse:
 
 def login(request: HttpRequest) -> HttpResponse:
     return HttpResponse("Авторизация")
+
+
+def show_category(request, cat_id):
+    """Функция-заглушка"""
+    return index(request)
 
 
 def page_not_found(request: HttpRequest, exception: Resolver404) -> HttpResponseNotFound:
