@@ -1,9 +1,11 @@
 from django.http import HttpResponse, HttpRequest, HttpResponseNotFound
-from django.shortcuts import redirect, reverse, render
+from django.shortcuts import get_object_or_404, redirect, reverse, render
 
 # from django.template.loader import render_to_string
 
 from django.urls.exceptions import Resolver404
+
+from women.models import Women
 
 data_db = [
     {
@@ -42,12 +44,11 @@ cats_db = [
 
 
 def index(request: HttpRequest) -> HttpResponse:
-    # t = render_to_string('women/index.html')
-    # return HttpResponse(t)
+    posts = Women.objects.filter(is_published=1)
     data = {
         "title": "Главная страница",
         "menu": menu,
-        "posts": data_db,
+        "posts": posts,
     }
     return render(request, "women/index.html", data)
 
@@ -75,8 +76,22 @@ def archive(request: HttpRequest, year: int) -> HttpResponse:
     return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
 
 
-def show_post(request: HttpRequest, post_id: int) -> HttpResponse:
-    return HttpResponse(f"Отображение статьи с id = {post_id}")
+def show_post(request: HttpRequest, post_slug: str) -> HttpResponse:
+    # Аналог:
+    # try:
+    #     post = Women.objects.get(pk=post_slug)
+    # except Women.DoesNotExist:
+    #     raise Http404("Page Not Found")
+    post = get_object_or_404(Women, slug=post_slug)
+
+    data = {
+        'title': post.title,
+        'menu': menu,
+        'post': post,
+        'cat_selected': 1,
+    }
+
+    return render(request, 'women/post.html', context=data)
 
 
 def addpage(request: HttpRequest) -> HttpResponse:
