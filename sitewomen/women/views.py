@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, reverse, render
 # from django.template.loader import render_to_string
 
 from django.urls.exceptions import Resolver404
+from women.models import TagPost
 
 from women.models import Category, Women
 
@@ -28,6 +29,7 @@ def index(request: HttpRequest) -> HttpResponse:
         "title": "Главная страница",
         "menu": menu,
         "posts": posts,
+        "cat_selected": 0,
     }
     return render(request, "women/index.html", data)
 
@@ -102,3 +104,16 @@ def page_not_found(
     request: HttpRequest, exception: Resolver404
 ) -> HttpResponseNotFound:
     return HttpResponseNotFound("<h1>Страница не найдена!</h1>")
+
+
+def show_tag_postlist(request: HttpRequest, tag_slug: str) -> HttpResponse:
+    tag = get_object_or_404(TagPost, slug=tag_slug)
+    posts = tag.women.filter(is_published=Women.Status.PUBLISHED)
+    data = {
+        'title': f'Тег: {tag.tag}',
+        'menu': menu,
+        'posts': posts,
+        'cat_selected': None,
+    }
+
+    return render(request, 'women/index.html', context=data)
