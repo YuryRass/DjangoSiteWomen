@@ -16,15 +16,9 @@ menu = [
     {"title": "Войти", "url_name": "login"},
 ]
 
-cats_db = [
-    {"id": 1, "name": "Актрисы"},
-    {"id": 2, "name": "Певицы"},
-    {"id": 3, "name": "Спортсменки"},
-]
-
 
 def index(request: HttpRequest) -> HttpResponse:
-    posts = Women.published.all()
+    posts = Women.published.all().select_related('cat')
     data = {
         "title": "Главная страница",
         "menu": menu,
@@ -58,11 +52,6 @@ def archive(request: HttpRequest, year: int) -> HttpResponse:
 
 
 def show_post(request: HttpRequest, post_slug: str) -> HttpResponse:
-    # Аналог:
-    # try:
-    #     post = Women.objects.get(pk=post_slug)
-    # except Women.DoesNotExist:
-    #     raise Http404("Page Not Found")
     post = get_object_or_404(Women, slug=post_slug)
 
     data = {
@@ -89,7 +78,7 @@ def login(request: HttpRequest) -> HttpResponse:
 
 def show_category(request, cat_slug):
     category = get_object_or_404(Category, slug=cat_slug)
-    posts = Women.published.filter(cat_id=category.pk)
+    posts = Women.published.filter(cat_id=category.pk).select_related("cat")
     data = {
         'title': f'Рубрика: {category.name}',
         'menu': menu,
@@ -107,8 +96,8 @@ def page_not_found(
 
 
 def show_tag_postlist(request: HttpRequest, tag_slug: str) -> HttpResponse:
-    tag = get_object_or_404(TagPost, slug=tag_slug)
-    posts = tag.women.filter(is_published=Women.Status.PUBLISHED)
+    tag: TagPost = get_object_or_404(TagPost, slug=tag_slug)
+    posts = tag.women.filter(is_published=Women.Status.PUBLISHED).select_related("cat")
     data = {
         'title': f'Тег: {tag.tag}',
         'menu': menu,
