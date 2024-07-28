@@ -14,15 +14,23 @@ class Women(models.Model):
         DRAFT = 0, 'Черновик'
         PUBLISHED = 1, 'Опубликовано'
 
+        @classmethod
+        def variants(cls) -> tuple[tuple[bool, str]]:
+            return tuple(map(lambda x: (bool(x[0]), x[1]), cls.choices))
+
     title = models.CharField(max_length=255, verbose_name="Заголовок")
     slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="URL")
     content = models.TextField(blank=True, verbose_name="Содержимое")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время создания")
     time_update = models.DateTimeField(auto_now=True, verbose_name="Дата и время обновления")
-    is_published = models.BooleanField(choices=Status.choices, default=Status.DRAFT)
-    cat = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='posts')
-    tags = models.ManyToManyField('TagPost', blank=True, related_name='women')
-    husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True, related_name='woman')
+    is_published = models.BooleanField(
+        choices=Status.variants(),
+        default=Status.DRAFT,
+        verbose_name="Статус"
+    )
+    cat = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='posts', verbose_name="Категория")
+    tags = models.ManyToManyField('TagPost', blank=True, related_name='women', verbose_name="Теги")
+    husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True, related_name='woman', verbose_name="Муж")
 
     objects = models.Manager()
     published = PublishedModel()
@@ -42,13 +50,15 @@ class Women(models.Model):
 
     class Meta:
         ordering = ['-time_create']
+        verbose_name = 'Известные женщины'
+        verbose_name_plural = 'Известные женщины'
         indexes = [
             models.Index(fields=['-time_create']),
         ]
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, db_index=True)
+    name = models.CharField(max_length=100, db_index=True, verbose_name="Категория")
     slug = models.SlugField(max_length=255, unique=True, db_index=True)
 
 
@@ -57,6 +67,10 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('category', kwargs={'cat_slug': self.slug})
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
 class TagPost(models.Model):

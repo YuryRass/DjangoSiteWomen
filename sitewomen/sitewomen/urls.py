@@ -27,5 +27,6 @@ urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
 ]
 
-
+admin.site.site_header = "Панель администрирования"
+admin.site.index_title = "Известные женщины мира"
 handler404 = page_not_found
