@@ -1,7 +1,6 @@
 from django import template
 from django.db.models import Count
-from women.models import TagPost
-from women.models import Category
+from women.models import Category, TagPost
 
 register = template.Library()
 

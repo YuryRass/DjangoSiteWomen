@@ -1,12 +1,11 @@
-from django.http import HttpResponse, HttpRequest, HttpResponseNotFound
-from django.shortcuts import get_object_or_404, redirect, reverse, render
+from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
+from django.shortcuts import get_object_or_404, redirect, render, reverse
+from django.urls.exceptions import Resolver404
+from women.models import Category, TagPost, Women
 
 # from django.template.loader import render_to_string
 
-from django.urls.exceptions import Resolver404
-from women.models import TagPost
 
-from women.models import Category, Women
 
 
 menu = [
