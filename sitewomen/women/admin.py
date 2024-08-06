@@ -4,6 +4,21 @@ from django.db.models.functions import Length
 from django.http import HttpRequest
 from women.models import Category, Women
 
+class MarriedFilter(admin.SimpleListFilter):
+    title = 'Статус женщин'
+    parameter_name = 'status'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('married', 'Замужем'),
+            ('single', 'Не замужем'),
+        ]
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet):
+        if self.value() == "married":
+            return queryset.filter(husband__isnull=False)
+        elif self.value() == "single":
+            return queryset.filter(husband__isnull=True)
 
 @admin.register(Women)
 class WomenAdmin(admin.ModelAdmin):
@@ -13,6 +28,8 @@ class WomenAdmin(admin.ModelAdmin):
     list_editable = ("is_published", )
     list_per_page = 5
     actions = ("set_published", "set_draft",)
+    search_fields = ('title', 'cat__name',)
+    list_filter = (MarriedFilter, 'cat__name', 'is_published', )
 
     @admin.display(description="Краткое описание", ordering=Length("content"))
     def brief_info(self, women: Women):
