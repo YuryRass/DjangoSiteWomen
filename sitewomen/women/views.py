@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls.exceptions import Resolver404
@@ -68,9 +69,9 @@ def addpage(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             try:
                 Women.objects.create(**form.cleaned_data)
-                return redirect('home')
+                return redirect("home")
             except:
-                form.add_error(None, 'Ошибка добавления поста')
+                form.add_error(None, "Ошибка добавления поста")
     else:
         form = AddPostForm()
 
