@@ -21,45 +21,28 @@ class RussianValidator:
             raise forms.ValidationError(self.message, self.code)
 
 
-class AddPostForm(forms.Form):
-    title = forms.CharField(
-        max_length=255,
-        min_length=5,
-        widget=forms.TextInput(attrs={"class": "form-input"}),
-        label="Заголовок",
-        validators=[RussianValidator()],
-        error_messages={
-            "min_length": "Слишком короткое название (min = 5 символов)",
-        },
-    )
-    slug = forms.SlugField(
-        max_length=255,
-        label="URL",
-        error_messages={
-            "required": "Данное поле обязательное для заполнения",
-        },
-    )
-    content = forms.CharField(
-        widget=forms.Textarea(attrs={"cols": 70, "rows": 20}),
-        required=False,
-        label="Контент",
-    )
-    is_published = forms.BooleanField(required=False, label="Статус", initial=True)
-    cat = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
-        label="Категории",
-        empty_label="Категория не выбрана",
-    )
-    husband = forms.ModelChoiceField(
-        queryset=Husband.objects.all(),
-        required=False,
-        label="Муж",
-        empty_label="Не замужем",
-    )
+class AddPostForm(forms.ModelForm):
+    cat = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label="Категория не выбрана", label="Категории")
+    husband = forms.ModelChoiceField(queryset=Husband.objects.all(), required=False, empty_label="Не замужем", label="Муж")
 
-    def clean_husband(self):
-        current_husband = self.cleaned_data.get('husband')
+    class Meta:
+        model = Women
+        fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input'}),
+            'content': forms.Textarea(attrs={'cols': 60, 'rows': 10}),
+        }
+        labels = {
+            'slug': "URL"
+        }
 
-        if current_husband and Women.objects.filter(husband=current_husband).exists():
-            raise forms.ValidationError(f"{current_husband} - уже занят другой женщиной")
-        return current_husband
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if len(title) > 50:
+            raise forms.ValidationError('Длина превышает 50 символов')
+
+        return title
+
+
+class UploadFiles(forms.Form):
+    file = forms.FileField(label="Файл")

@@ -1,8 +1,8 @@
-from django.db import IntegrityError
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls.exceptions import Resolver404
-from women.forms import AddPostForm
+from women.forms import AddPostForm, UploadFiles
 from women.models import Category, TagPost, Women
 
 # from django.template.loader import render_to_string
@@ -27,11 +27,24 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, "women/index.html", data)
 
 
+def write_file(uploaded_file: InMemoryUploadedFile):
+    with open(f"sitewomen/uploads/{uploaded_file.name}", 'wb') as upl_file:
+        for chunk in uploaded_file.chunks():
+            upl_file.write(chunk)
+
+
 def about(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form = UploadFiles(request.POST, request.FILES)
+        if form.is_valid():
+            write_file(form.cleaned_data['file'])
+    else:
+        form = UploadFiles()
+
     return render(
         request,
         "women/about.html",
-        {"menu": menu, "title": "Сайт о женщинах"},
+        {"menu": menu, "title": "Сайт о женщинах", "form": form},
     )
 
 
@@ -67,11 +80,8 @@ def addpage(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = AddPostForm(request.POST)
         if form.is_valid():
-            try:
-                Women.objects.create(**form.cleaned_data)
-                return redirect("home")
-            except:
-                form.add_error(None, "Ошибка добавления поста")
+            form.save()
+            return redirect("home")
     else:
         form = AddPostForm()
 
