@@ -31,6 +31,7 @@ INTERNAL_IPS = [
 ]
 
 MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
 
 # Application definition
 
