@@ -2,8 +2,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls.exceptions import Resolver404
-from women.forms import AddPostForm, UploadFiles
-from women.models import Category, TagPost, Women
+from women.forms import AddPostForm, UploadFilesForm
+from women.models import Category, TagPost, Women, UploadFiles
 
 # from django.template.loader import render_to_string
 
@@ -35,11 +35,13 @@ def write_file(uploaded_file: InMemoryUploadedFile):
 
 def about(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        form = UploadFiles(request.POST, request.FILES)
+        form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
-            write_file(form.cleaned_data['file'])
+            # write_file(form.cleaned_data['file'])
+            new_file = UploadFiles(file=form.cleaned_data['file'])
+            new_file.save()
     else:
-        form = UploadFiles()
+        form = UploadFilesForm()
 
     return render(
         request,
@@ -78,7 +80,7 @@ def show_post(request: HttpRequest, post_slug: str) -> HttpResponse:
 
 def addpage(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        form = AddPostForm(request.POST)
+        form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect("home")
