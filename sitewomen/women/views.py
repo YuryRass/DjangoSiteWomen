@@ -1,9 +1,11 @@
+from typing import Any
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls.exceptions import Resolver404
 from django.views import View
-from django.views.generic.base import TemplateView
+from django.views.generic import TemplateView, ListView
 from women.forms import AddPostForm, UploadFilesForm
 from women.models import Category, TagPost, Women, UploadFiles
 
@@ -29,14 +31,20 @@ menu = [
 #     return render(request, "women/index.html", data)
 
 
-class HomeWomen(TemplateView):
+class HomeWomen(ListView):
     template_name = "women/index.html"
-    extra_context = {
-        "title": "Известные женщины",
-        "menu": menu,
-        "posts": Women.published.all().select_related("cat"),
-        "cat_selected": 0,
-    }
+    context_object_name = "posts"
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Главная страница"
+        context["menu"] = menu
+        context["cat_selected"] = 0
+        return context
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return Women.published.all().select_related('cat')
+
 
 def write_file(uploaded_file: InMemoryUploadedFile):
     with open(f"sitewomen/uploads/{uploaded_file.name}", "wb") as upl_file:
@@ -89,7 +97,6 @@ def show_post(request: HttpRequest, post_slug: str) -> HttpResponse:
     return render(request, "women/post.html", context=data)
 
 
-
 class AddPage(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         form = AddPostForm()
@@ -118,17 +125,21 @@ def login(request: HttpRequest) -> HttpResponse:
     return HttpResponse("Авторизация")
 
 
-def show_category(request, cat_slug):
-    category = get_object_or_404(Category, slug=cat_slug)
-    posts = Women.published.filter(cat_id=category.pk).select_related("cat")
-    data = {
-        "title": f"Рубрика: {category.name}",
-        "menu": menu,
-        "posts": posts,
-        "cat_selected": category.pk,
-    }
+class WomenCategory(ListView):
+    template_name = 'women/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
 
-    return render(request, "women/index.html", context=data)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cat = context['posts'][0].cat
+        context['title'] = 'Категория - ' + cat.name
+        context['menu'] = menu
+        context['cat_selected'] = cat.id
+        return context
+
+    def get_queryset(self):
+        return Women.published.filter(cat__slug=self.kwargs['cat_slug']).select_related('cat')
 
 
 def page_not_found(
