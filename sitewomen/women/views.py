@@ -5,7 +5,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls.exceptions import Resolver404
 from django.views import View
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DeleteView
 from women.forms import AddPostForm, UploadFilesForm
 from women.models import Category, TagPost, Women, UploadFiles
 
@@ -43,7 +43,7 @@ class HomeWomen(ListView):
         return context
 
     def get_queryset(self) -> QuerySet[Any]:
-        return Women.published.all().select_related('cat')
+        return Women.published.all().select_related("cat")
 
 
 def write_file(uploaded_file: InMemoryUploadedFile):
@@ -84,17 +84,21 @@ def archive(request: HttpRequest, year: int) -> HttpResponse:
     return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
 
 
-def show_post(request: HttpRequest, post_slug: str) -> HttpResponse:
-    post = get_object_or_404(Women, slug=post_slug)
+class ShowPost(DeleteView):
+    model = Women
+    context_object_name = 'post'
+    template_name = "women/post.html"
+    slug_url_kwarg = "post_slug"  # pk_url_kwarg - для ID
 
-    data = {
-        "title": post.title,
-        "menu": menu,
-        "post": post,
-        "cat_selected": 1,
-    }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = context['post'].title
+        context['menu'] = menu
+        return context
 
-    return render(request, "women/post.html", context=data)
+    def get_object(self, queryset=None):
+        return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwarg])
+
 
 
 class AddPage(View):
@@ -126,20 +130,22 @@ def login(request: HttpRequest) -> HttpResponse:
 
 
 class WomenCategory(ListView):
-    template_name = 'women/index.html'
-    context_object_name = 'posts'
+    template_name = "women/index.html"
+    context_object_name = "posts"
     allow_empty = False
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        cat = context['posts'][0].cat
-        context['title'] = 'Категория - ' + cat.name
-        context['menu'] = menu
-        context['cat_selected'] = cat.id
+        cat = context["posts"][0].cat
+        context["title"] = "Категория - " + cat.name
+        context["menu"] = menu
+        context["cat_selected"] = cat.id
         return context
 
     def get_queryset(self):
-        return Women.published.filter(cat__slug=self.kwargs['cat_slug']).select_related('cat')
+        return Women.published.filter(cat__slug=self.kwargs["cat_slug"]).select_related(
+            "cat"
+        )
 
 
 def page_not_found(
@@ -148,14 +154,33 @@ def page_not_found(
     return HttpResponseNotFound("<h1>Страница не найдена!</h1>")
 
 
-def show_tag_postlist(request: HttpRequest, tag_slug: str) -> HttpResponse:
-    tag: TagPost = get_object_or_404(TagPost, slug=tag_slug)
-    posts = tag.women.filter(is_published=Women.Status.PUBLISHED).select_related("cat")
-    data = {
-        "title": f"Тег: {tag.tag}",
-        "menu": menu,
-        "posts": posts,
-        "cat_selected": None,
-    }
+# def show_tag_postlist(request: HttpRequest, tag_slug: str) -> HttpResponse:
+#     tag: TagPost = get_object_or_404(TagPost, slug=tag_slug)
+#     posts = tag.women.filter(is_published=Women.Status.PUBLISHED).select_related("cat")
+#     data = {
+#         "title": f"Тег: {tag.tag}",
+#         "menu": menu,
+#         "posts": posts,
+#         "cat_selected": None,
+#     }
 
-    return render(request, "women/index.html", context=data)
+#     return render(request, "women/index.html", context=data)
+
+
+class ShowTagPostList(ListView):
+    template_name = "women/index.html"
+    context_object_name = "posts"
+    allow_empty = False
+
+    def get_queryset(self):
+        return Women.published.filter(
+            tags__slug=self.kwargs["tag_slug"]
+        ).select_related("cat")
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag = TagPost.objects.get(slug=self.kwargs["tag_slug"])
+        context["title"] = "Тег - " + tag.tag
+        context["menu"] = menu
+        context["cat_selected"] = None
+        return context
