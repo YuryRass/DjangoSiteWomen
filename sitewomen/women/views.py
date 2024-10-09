@@ -6,7 +6,15 @@ from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls import reverse_lazy
 from django.urls.exceptions import Resolver404
 from django.views import View
-from django.views.generic import TemplateView, ListView, DeleteView, FormView
+from django.views.generic import (
+    TemplateView,
+    ListView,
+    DetailView,
+    DeleteView,
+    FormView,
+    CreateView,
+    UpdateView,
+)
 from women.forms import AddPostForm, UploadFilesForm
 from women.models import Category, TagPost, Women, UploadFiles
 
@@ -19,6 +27,7 @@ menu = [
     {"title": "Обратная связь", "url_name": "contact"},
     {"title": "Войти", "url_name": "login"},
 ]
+
 
 class HomeWomen(ListView):
     template_name = "women/index.html"
@@ -73,34 +82,51 @@ def archive(request: HttpRequest, year: int) -> HttpResponse:
     return HttpResponse(f"<h1>Архив по годам</h1><p>Year: {year}</p>")
 
 
-class ShowPost(DeleteView):
-    context_object_name = 'post'
+class ShowPost(DetailView):
+    context_object_name = "post"
     template_name = "women/post.html"
     slug_url_kwarg = "post_slug"  # pk_url_kwarg - для ID
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = context['post'].title
-        context['menu'] = menu
+        context["title"] = context["post"].title
+        context["menu"] = menu
         return context
 
     def get_object(self, queryset=None):
         return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwarg])
 
 
-
-class AddPage(FormView):
+class AddPage(CreateView):
     form_class = AddPostForm
     template_name = "women/addpage.html"
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy("home")
     extra_context = {
         "menu": menu,
         "title": "Добавление статьи",
     }
 
-    def form_valid(self, form: Any) -> HttpResponse:
-        form.save()
-        return super().form_valid(form)
+
+class UpdatePage(UpdateView):
+    model = Women
+    fields = ["title", "content", "photo", "is_published", "cat"]
+    template_name = "women/addpage.html"
+    success_url = reverse_lazy("home")
+    extra_context = {
+        "menu": menu,
+        "title": "Добавление статьи",
+    }
+
+
+class DeletePage(DeleteView):
+    model = Women
+    template_name = "women/del_page.html"
+    context_object_name = "page"
+    success_url = reverse_lazy("home")
+    extra_context = {
+        "title": "Удаление поста",
+    }
+
 
 
 def contact(request: HttpRequest) -> HttpResponse:
@@ -134,19 +160,6 @@ def page_not_found(
     request: HttpRequest, exception: Resolver404
 ) -> HttpResponseNotFound:
     return HttpResponseNotFound("<h1>Страница не найдена!</h1>")
-
-
-# def show_tag_postlist(request: HttpRequest, tag_slug: str) -> HttpResponse:
-#     tag: TagPost = get_object_or_404(TagPost, slug=tag_slug)
-#     posts = tag.women.filter(is_published=Women.Status.PUBLISHED).select_related("cat")
-#     data = {
-#         "title": f"Тег: {tag.tag}",
-#         "menu": menu,
-#         "posts": posts,
-#         "cat_selected": None,
-#     }
-
-#     return render(request, "women/index.html", context=data)
 
 
 class ShowTagPostList(ListView):
