@@ -3,9 +3,10 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render, reverse
+from django.urls import reverse_lazy
 from django.urls.exceptions import Resolver404
 from django.views import View
-from django.views.generic import TemplateView, ListView, DeleteView
+from django.views.generic import TemplateView, ListView, DeleteView, FormView
 from women.forms import AddPostForm, UploadFilesForm
 from women.models import Category, TagPost, Women, UploadFiles
 
@@ -18,18 +19,6 @@ menu = [
     {"title": "Обратная связь", "url_name": "contact"},
     {"title": "Войти", "url_name": "login"},
 ]
-
-
-# def index(request: HttpRequest) -> HttpResponse:
-#     posts = Women.published.all().select_related("cat")
-#     data = {
-#         "title": "Главная страница",
-#         "menu": menu,
-#         "posts": posts,
-#         "cat_selected": 0,
-#     }
-#     return render(request, "women/index.html", data)
-
 
 class HomeWomen(ListView):
     template_name = "women/index.html"
@@ -85,7 +74,6 @@ def archive(request: HttpRequest, year: int) -> HttpResponse:
 
 
 class ShowPost(DeleteView):
-    model = Women
     context_object_name = 'post'
     template_name = "women/post.html"
     slug_url_kwarg = "post_slug"  # pk_url_kwarg - для ID
@@ -101,24 +89,18 @@ class ShowPost(DeleteView):
 
 
 
-class AddPage(View):
-    def get(self, request: HttpRequest) -> HttpResponse:
-        form = AddPostForm()
-        return render(
-            request,
-            "women/addpage.html",
-            {
-                "menu": menu,
-                "title": "Добавление статьи",
-                "form": form,
-            },
-        )
+class AddPage(FormView):
+    form_class = AddPostForm
+    template_name = "women/addpage.html"
+    success_url = reverse_lazy('home')
+    extra_context = {
+        "menu": menu,
+        "title": "Добавление статьи",
+    }
 
-    def post(self, request: HttpRequest) -> HttpResponse:
-        form = AddPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect("home")
+    def form_valid(self, form: Any) -> HttpResponse:
+        form.save()
+        return super().form_valid(form)
 
 
 def contact(request: HttpRequest) -> HttpResponse:
