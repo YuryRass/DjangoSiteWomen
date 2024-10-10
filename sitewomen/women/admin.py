@@ -1,9 +1,9 @@
 from django.contrib import admin, messages
-from django.utils.safestring import mark_safe, SafeText
 from django.db.models import QuerySet
-from django.db.models.functions import Length
 from django.http import HttpRequest
+from django.utils.safestring import SafeText, mark_safe
 from women.models import Category, Women
+
 
 class MarriedFilter(admin.SimpleListFilter):
     title = 'Статус женщин'

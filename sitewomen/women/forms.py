@@ -1,6 +1,8 @@
 from typing import Any
+
 from django import forms
 from django.utils.deconstruct import deconstructible
+
 from .models import Category, Husband, Women
 
 
@@ -44,5 +46,5 @@ class AddPostForm(forms.ModelForm):
         return title
 
 
-class UploadFilesForm(forms.Form):
+class UploadFileForm(forms.Form):
     file = forms.FileField(label="Файл")
