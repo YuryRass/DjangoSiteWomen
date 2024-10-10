@@ -1,7 +1,9 @@
 from typing import Any
+from django.core.paginator import Paginator
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
+
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls import reverse_lazy
 from django.urls.exceptions import Resolver404
@@ -52,20 +54,13 @@ def write_file(uploaded_file: InMemoryUploadedFile):
 
 
 def about(request: HttpRequest) -> HttpResponse:
-    if request.method == "POST":
-        form = UploadFilesForm(request.POST, request.FILES)
-        if form.is_valid():
-            # write_file(form.cleaned_data['file'])
-            new_file = UploadFiles(file=form.cleaned_data["file"])
-            new_file.save()
-    else:
-        form = UploadFilesForm()
+    contact_list = Women.published.all()
+    paginator = Paginator(contact_list, 3)
 
-    return render(
-        request,
-        "women/about.html",
-        {"menu": menu, "title": "Сайт о женщинах", "form": form},
-    )
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'women/about.html', {'page_obj': page_obj, 'title': 'О сайте'})
 
 
 def categories(request: HttpRequest) -> HttpResponse:
