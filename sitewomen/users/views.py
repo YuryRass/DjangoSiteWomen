@@ -1,11 +1,7 @@
 from django.contrib.auth.views import LoginView
-
-from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 
-from users.forms import LoginUserForm
-from django.contrib.auth import authenticate, login, logout
+from users.forms import LoginUserForm, RegisterUserForm
 
 
 class LoginUser(LoginView):
@@ -14,6 +10,14 @@ class LoginUser(LoginView):
     extra_context = {'title': "Авторизация"}
 
 
-# def logout_user(request: HttpRequest) -> HttpResponseRedirect:
-#     logout(request)
-#     return HttpResponseRedirect(reverse('users:login'))
+def register(request):
+    if request.method == "POST":
+        form = RegisterUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return render(request, 'users/register_done.html')
+    else:
+        form = RegisterUserForm()
+    return render(request, 'users/register.html', {'form': form})
