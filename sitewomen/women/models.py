@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 
@@ -25,8 +26,11 @@ class Women(models.Model):
     )
     content = models.TextField(blank=True, verbose_name="Содержимое")
     photo = models.ImageField(
-        upload_to="photos/%Y/%m/%d/", default=None,
-        blank=True, null=True, verbose_name="Фото",
+        upload_to="photos/%Y/%m/%d/",
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Фото",
     )
     time_create = models.DateTimeField(
         auto_now_add=True, verbose_name="Дата и время создания"
@@ -54,9 +58,17 @@ class Women(models.Model):
         related_name="woman",
         verbose_name="Муж",
     )
+    author = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_NULL,
+        related_name="posts",
+        null=True,
+        default=None,
+    )
 
     objects = models.Manager()
     published = PublishedModel()
+
 
     def __str__(self) -> str:
         return (
