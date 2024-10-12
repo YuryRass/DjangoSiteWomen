@@ -63,10 +63,6 @@ def contact(request):
     return HttpResponse("Обратная связь")
 
 
-def login(request):
-    return HttpResponse("Авторизация")
-
-
 class WomenCategory(DataMixin, ListView):
     template_name = "women/index.html"
     context_object_name = "posts"

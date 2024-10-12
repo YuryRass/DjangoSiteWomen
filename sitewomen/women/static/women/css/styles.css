@@ -57,6 +57,20 @@ div.article-panel p.last {
     float: right;
 }
 
+li.last form {
+    display: inline-block;
+}
+
+li.last form button {
+    all: unset;
+}
+
+/* Стили для кнопки при наведении */
+li.last form button:hover {
+    color: #FDA83D; /* Цвет текста при наведении */
+    cursor: pointer; /* Изменение курсора на указатель */
+}
+
 ul.list-articles {
 	list-style: none;
 	margin: 0;
